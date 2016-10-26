@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+<title>MultiSeriesLineGraph</title>
+
+<style>
+   <style>
+
+
+   .svg
+   {
+      background: antiquewhite;
+      margin-left:auto;
+      margin-right:auto;
+      display: block;
+   }
+
+.line {
+    
+    stroke-width: 2px;
+}
+path {
+  
+  stroke-width: 2;
+  fill: none;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: black;  /*x and y axis line*/
+  stroke-width: 1.5;
+  }
+  
+  
+</style>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+</head>
+<body>
+
+<div id="multiline">
+  <h1></h1>
+  <h4 style="color:green;text-align:center">Arrested</h4>
+  <h4 style="color:red;text-align:center">NotArrested</h4>
+     </div>
+
+<script>
+
+var margin={top:40, bottom:100, left:150, right:90},
+    width=960-margin.left-margin.right,
+    height=600-margin.top-margin.bottom;
+
+  var horizontal=d3.scale.ordinal().rangeRoundBands([0,width],0.12),
+    vertical=d3.scale.linear().rangeRound([height,0]);
+
+var x = d3.scale.ordinal()
+    .rangeRoundBands([0,width], 0.2,0.2);
+var y = d3.scale.linear().range([height, 0]);
+
+ var  xAxis = d3.svg.axis().scale(x)
+  .orient("bottom");
+
+var yAxis = d3.svg.axis().scale(y)
+  .orient("left");
+
+var valueline = d3.svg.line()
+  .x(function(d) { return x(d.Year); })
+  .y(function(d) { return y(d.Arrested); });
+
+var valueline2 = d3.svg.line()
+  .x(function(d) { return x(d.Year); })
+  .y(function(d) { return y(d.NotArrested); });
+
+
+
+var svg = d3.select("#multiline")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// Get the data
+d3.json("jsons/assault.json", function(error, data) {
+  data.forEach(function(d) {
+    d.Year = d.Year;
+    d.Arrested = d.Arrested;
+    d.NotArrested = d.NotArrested;
+  });
+
+  x.domain(data.map(function(d){
+      return d.Year;
+  }));
+  // Scale the range of the data
+  
+  y.domain([0, d3.max(data, function(d) { return Math.max(d.Arrested, d.NotArrested); })]);
+
+  svg.append("path")    
+    .attr("class", "line")
+    .style("stroke", "red")     //Year Vs fat
+    .attr("d", valueline(data));
+
+
+  svg.append("path")    
+    .attr("class", "line")
+    .style("stroke", "green")  //Year Vs protein
+    .attr("d", valueline2(data));
+
+
+svg.append("g")
+      .attr("class", "axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+      .append("text")
+       .attr("transform", "translate(" + width + ",0)")
+       .attr("dy","1.3em")
+       .attr("dx","1.2em")
+       .style("font-size","15px")
+       .style("font-weight","bold")
+       .style("color","red")
+       .text("Year");
+
+    svg.append("g")
+    .attr("class", "axis")
+    .call(yAxis)
+    .append("text")
+       .attr("transform", "rotate(-90)")
+       .attr("dy","1em")
+       .style("text-anchor", "end")
+       .style("font-size","12px")
+       .style("font-weight","bold")
+       .text("Arrested,NotArrested");
+
+       var text = svg.append("svg:text");
+
+       
+});
+
+</script>
+<a href="bar.html">Bar chart</a>
+</body>
+</html>
